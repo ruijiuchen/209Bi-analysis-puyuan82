@@ -611,7 +611,7 @@ def draw_region_boxes(canvas, graph, regions, simulation_lines, save_images=True
             canvas.Update()
             # 保存为PNG图片
             # 生成文件名（去除可能的不合法文件名字符）
-            safe_name = label_text.replace(' ', '_').replace('/', '_')
+            safe_name = label_text.replace(' ', '').replace('/', '')
             filename = f"analysis_results/{safe_name}.png"
             canvas.SaveAs(filename)
             filename = f"analysis_results/{safe_name}.root"
