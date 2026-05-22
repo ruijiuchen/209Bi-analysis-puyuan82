@@ -79,7 +79,42 @@ def read_peaks_data_with_full_lines(filename):
     
     return np.array(frequencies), np.array(areas_per_frame), full_lines
 
-
+def merge_multiple_peaks_files(filenames):
+    """
+    合并多个峰值数据文件
+    
+    Parameters:
+    -----------
+    filenames : list
+        数据文件路径列表
+    
+    Returns:
+    --------
+    frequencies : np.ndarray
+        合并后的频率数组
+    areas_per_bin : np.ndarray
+        合并后的每bin面积数组
+    full_lines : list
+        合并后的完整原始行列表
+    """
+    all_frequencies = []
+    all_areas = []
+    all_lines = []
+    
+    for filename in filenames:
+        print(f"正在读取: {filename}")
+        freqs, areas, lines = read_peaks_data_with_full_lines(filename)
+        all_frequencies.extend(freqs)
+        all_areas.extend(areas)
+        all_lines.extend(lines)
+        print(f"  添加了 {len(freqs)} 个数据点")
+    
+    print(f"\n总计: {len(all_frequencies)} 个数据点")
+    
+    return (np.array(all_frequencies), 
+            np.array(all_areas), 
+            all_lines)
+    
 def read_simulation_results(filename):
     """
     读取simulation_result.out文件，提取频率和yield信息
@@ -822,9 +857,10 @@ def main():
     )
     
     parser.add_argument(
-        "filename",
+        "filenames",
         type=str,
-        help="输入数据文件路径 (如: all_peaks_summary.txt)"
+        nargs='+',  # 接受一个或多个文件名
+        help="输入数据文件路径，可以指定多个文件 (如: file1.txt file2.txt file3.txt)"
     )
     
     parser.add_argument(
@@ -965,9 +1001,11 @@ def main():
             sys.exit(1)
     
     try:
+        
         # 1. 读取峰值数据（包含完整行）
-        print(f"正在读取峰值文件: {args.filename}")
-        frequencies, areas_per_frame, full_lines = read_peaks_data_with_full_lines(args.filename)
+        print(f"正在读取 {len(args.filenames)} 个峰值文件:")
+        frequencies, areas_per_frame, full_lines = merge_multiple_peaks_files(args.filenames)
+        
         print(f"成功读取 {len(frequencies)} 个数据点")
         print(f"原始频率范围: {frequencies.min():.6f} - {frequencies.max():.6f} MHz")
         print(f"原始每frame面积范围: {areas_per_frame.min():.6e} - {areas_per_frame.max():.6e}")
